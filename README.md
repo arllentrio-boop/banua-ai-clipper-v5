@@ -1,25 +1,19 @@
-# BANUA AI CLIPPER V5 ULTRA — Web Edition
+# BANUA AI CLIPPER V6 ULTRA PRO — prototype
 
-Aplikasi web berbahasa Indonesia untuk membuat klip MP4 dari URL video yang bisa diakses. **Tidak perlu upload video dari komputer.**
+## Cara pakai
+Unggah seluruh file ke root repository GitHub `banua-ai-clipper-v5` (gantikan file yang lama). Deploy sebagai Docker Web Service pada Render atau server Docker lain. Port mengikuti variabel `PORT`. Akses URL server yang baru untuk menguji langsung. Cloudflare frontend lama tidak otomatis terhubung ke backend baru.
 
-## Jalankan dengan Docker
+## Fitur
+- Registrasi/login akun dengan password PBKDF2 dan sesi 24 jam.
+- Upload video maksimum 100 MB; alternatif URL via yt-dlp.
+- Pemotongan FFmpeg, rasio 9:16, 1:1, 16:9.
+- Whisper tiny transkripsi (unduh model saat pertama kali), subtitle SRT terpisah.
+- Pemeringkatan kandidat berdasarkan kepadatan kata dan kata pemicu (heuristik, bukan model prediksi viral terlatih).
+- Face-aware crop menggunakan deteksi wajah pada satu frame per klip, **bukan continuous tracking**.
+- Judul/caption dibuat dari transkrip (template, **belum AI generatif**).
 
-1. Instal Docker Desktop (Windows/Mac) atau Docker Engine (Linux).
-2. Buka terminal di folder ini.
-3. Jalankan `docker compose up --build -d`.
-4. Buka `http://localhost:8000` di browser.
-5. Tempel link video, pilih jumlah/durasi/rasio, lalu proses.
+## Batasan / keamanan
+Prototype ini bukan production-ready. Database SQLite, file proyek, dan sesi disimpan pada disk lokal container yang **ephemeral** pada banyak hosting gratis: akun dan hasil dapat hilang saat restart/deploy. Status job disimpan di RAM. Satu proses video dapat menghabiskan CPU/RAM dan gagal pada instance gratis. Download memakai token URL sementara; hindari membagikan URL tersebut. Tambahkan HTTPS, object storage, rate limiting, job queue, antivirus, dan autentikasi yang lebih kuat sebelum membuka pendaftaran publik. Gunakan konten milik sendiri/berizin. Tidak menjamin dukungan semua platform URL.
 
-## Publikasikan online
-
-Deploy folder ini pada VPS atau layanan container hosting yang mendukung Docker, FFmpeg, penyimpanan persisten, dan proses cukup panjang. Atur HTTPS/domain melalui reverse proxy. **Belum di-deploy dan belum ada URL publik.** Jangan mengekspos versi demo langsung ke internet tanpa menambahkan autentikasi, rate limit, pembatasan penggunaan sumber daya, penghapusan otomatis file, dan kontrol keamanan URL/SSRF. Gunakan hanya tautan video yang Anda berhak proses.
-
-## Fitur dan batasan
-
-- Sudah dibuat: form link, pengambilan video yt-dlp, auto-cut terdistribusi, 9:16 / 1:1 / 16:9, status proses, preview, download MP4.
-- Belum dibuat: penilaian momen viral berbasis AI, subtitle, face tracking, login, billing, dan penjadwalan posting.
-- Pemotongan saat ini **berdasarkan sebaran waktu**, bukan AI yang memahami isi video.
-- Link privat, DRM, login, batasan platform, atau URL tertentu bisa gagal.
-- Job berjalan di thread proses server; tidak tahan restart. Untuk produksi gunakan queue terpisah dan database.
-- Video dan hasil klip disimpan pada volume `/data` dan perlu kebijakan penghapusan.
-- Batas unduhan yt-dlp adalah 1000 MB, tetapi implementasi ini belum memiliki batas kuota server yang kuat.
+## Tes
+`docker build -t banua-v6 .` lalu `docker run -p 8000:8000 banua-v6` dan buka `http://localhost:8000`.
